@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <link rel="stylesheet" type="text/css" href="http://127.0.0.1:5000/resource/menu.css">
+        <script src="http://127.0.0.1:5000/resource/handlebars-v4.0.5.js"></script>
+        <script src="http://127.0.0.1:5000/resource/library.js"></script>
+        <script src="http://127.0.0.1:5000/resource/menu_script.js"></script>
+        <meta charset="utf-8">
+        <title>Telemetry</title>
+
+        <script type="text/x-handlebars" id="transfer_template">
+            <form action="POST" onsubmit="return ">
+            <!-- figure out the onsubmit function -->
+            <!-- perhaps we need a name property -->
+            {{#each dropdown}}
+                <select id="{{name}}" class="dropdown">
+                {{#each option}}
+                    <option value="{{this}}" class="dropdown_option">
+                        {{this}}
+                    </option>
+                {{/each}}
+                </select>
+            {{/each}}
+                <button type="button" class="submit_button">
+                <!-- perhaps no onsubmit? -->
+                    Submit
+                </button>
+            </form>
+        </script>
+    </head>
+
+    <body>
+        <div class="nav_bar" id="menu" style="background: #262626">
+           
+        </div>
+        <div class="nav_bar" id="submenu" style="background: #333333">
+          
+        </div>
+        <div class="content" id="content">
+            
+        </div>
+    </body>
+</html>

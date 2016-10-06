@@ -1,0 +1,50 @@
+body, html{
+    margin: 0px;
+    height: 100%;
+}
+
+.nav_bar{
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    /*border: 1px solid green;*/
+    outline: grey solid 1px;
+    /*shade?*/
+}
+
+.nav_btn:hover{
+    background: white;
+}
+.nav_btn{
+    margin: 0px; 
+    color: #bfbfbf;
+    float: left;
+    text-align: center;
+    /*border-right: 1px solid white;*/
+}
+
+    .primary_btn{
+        width: 70px;
+        padding: 11px;
+    }
+
+    .secondary_btn{
+        width: 70px;
+        padding: 11px;
+        padding-bottom: 7px;
+        padding-top: 7px;
+    }
+
+    .offset_btn{
+        margin-left: 40px;
+    }
+
+.content{
+    width: 100%;
+    height: 100%;
+    background: #a6a6a6;
+}
+
+/*font-size: 10px;*/
+/*change background of button when hovered*/
