@@ -12,17 +12,18 @@ class TransferTester(unittest.TestCase):
             {'couple': 1234567890, 'company': -1}
         ]
         for string in data:
-            try:
-                response = requests.post(
-                    self.url + '/transfer/',
-                    headers=self.headers,
-                    json=string,
-                    timeout=0.3
-                )
-            except requests.Timeout:
-                self.fail('Test timed out')
-            self.assertEqual(response.status_code, 200)
-            # print(response.content)
+            with self.subTest():
+                try:
+                    response = requests.post(
+                        self.url + '/transfer/',
+                        headers=self.headers,
+                        json=string,
+                        timeout=0.3
+                    )
+                except requests.Timeout:
+                    self.fail('Test timed out')
+                self.assertEqual(response.status_code, 200, msg=string)
+                # print(response.content)
 
     # @unittest.skip('testing')
     def test_invalid_request(self):
@@ -39,16 +40,17 @@ class TransferTester(unittest.TestCase):
             ''
         ]
         for string in data:
-            try:
-                response = requests.post(
-                    self.url + '/transfer/',
-                    headers=self.headers,
-                    json=string,
-                    timeout=0.1
-                )
-            except requests.Timeout:
-                self.fail('Test timed out')
-            self.assertEqual(response.status_code, 400)
+            with self.subTest():
+                try:
+                    response = requests.post(
+                        self.url + '/transfer/',
+                        headers=self.headers,
+                        json=string,
+                        timeout=0.1
+                    )
+                except requests.Timeout:
+                    self.fail('Test timed out')
+                self.assertEqual(response.status_code, 400, msg=string)
 
 
 if __name__ == '__main__':
