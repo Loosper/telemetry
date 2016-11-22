@@ -1,6 +1,5 @@
 import unittest
 import requests
-import json
 
 
 class TransferTester(unittest.TestCase):
@@ -10,20 +9,20 @@ class TransferTester(unittest.TestCase):
     def test_valid_request(self):
         data = [
             {'couple': 1234567890, 'company': 1},
-            {'couple': 1234567890, 'company': None}
+            {'couple': 1234567890, 'company': -1}
         ]
         for string in data:
             try:
                 response = requests.post(
                     self.url + '/transfer/',
                     headers=self.headers,
-                    json=json.dumps(string),
-                    timeout=0.1
+                    json=string,
+                    timeout=0.3
                 )
             except requests.Timeout:
                 self.fail('Test timed out')
             self.assertEqual(response.status_code, 200)
-            print(response.content)
+            # print(response.content)
 
     # @unittest.skip('testing')
     def test_invalid_request(self):
@@ -34,7 +33,9 @@ class TransferTester(unittest.TestCase):
             '{asdjkfh,234998;23sf_jkjsd}',
             '{couple:"","company":""}',
             'something incorrect',
-            'юникод',
+            '{"couple": -1234567890, "company": 1}',
+            '{"couple": 1234567890.123, "compan": 1}',
+            '{"couple": 12345678.123, "company": 1}',
             ''
         ]
         for string in data:
