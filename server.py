@@ -18,6 +18,14 @@ app = Flask(
 database = None
 
 
+def load_json():
+    try:
+        data = json.loads(request.data.decode('utf-8'))
+    except json.JSONDecodeError:
+        abort(400)
+    return data
+
+
 @app.route('/')
 def load_page():
     return app.send_static_file('telemetry.html')
@@ -33,10 +41,7 @@ def enter(thing):
 @app.route('/transfer/', methods=['POST'])  # PUT or POST
 def transfer():
     """Takes a JSON object containing the couple ID and the company name"""
-    try:
-        data = json.loads(request.data.decode('utf-8'))
-    except json.JSONDecodeError:
-        abort(400)
+    data = load_json()
 
     company_mapping = {
         -1: None,
@@ -52,20 +57,17 @@ def transfer():
 
     try:
         schema(data)
-    except MultipleInvalid as exc:
-        print(exc.msg)
+    except MultipleInvalid:
+        # print(exc.msg)
         abort(400)
 
     # literal strings on 3.6
-    query = 'UPDATE couple SET assigned_to = %s WHERE id = %s'  # .format(
-    #     company_mapping.get(data['company'], 'NULL'), data['couple']
-    #     mapping table would be nice
-    # )
+    query = 'UPDATE couple SET assigned_to = %s WHERE id = %s'
     # print(query)
 
     cursor = database.cursor()
     cursor.execute(query, (
-        company_mapping.get(data['company'], 'DEFAULT'), data['couple']
+        company_mapping[data['company']], data['couple']
     ))
 
     if not cursor.fetchall():
@@ -92,5 +94,6 @@ if __name__ == '__main__':
         # DATABASE=database
     )
     # app.config['DATABASE'] = database
+
     app.run(host='127.0.0.1')
     database.close()
