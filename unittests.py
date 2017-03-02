@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# technically these are black box tests, not unittest
+
 import unittest
 import requests
 
@@ -9,9 +11,9 @@ class LibraryClass(unittest.TestCase):
     url = 'http://localhost:5000/'
     headers = {'Content-type': 'application/json'}
 
-    def submitter(self, data, response_code, path=''):
+    def submitter(self, data, response_code, path='', msg=''):
         for string in data:
-            with self.subTest():
+            with self.subTest(optional_message=msg):
                 try:
                     response = requests.post(
                         self.url + path,
@@ -24,6 +26,8 @@ class LibraryClass(unittest.TestCase):
                 self.assertEqual(
                     response.status_code, response_code, msg=string
                 )
+                print(response.message)  # temporary
+                # response will be the wrong element in debug mode
 
 
 @unittest.skip('Not implemented')
@@ -44,15 +48,16 @@ class EntryTester(LibraryClass):
     def flatten(self, data):
         # could use variable renaming
         output = []
-        for path, the_dict in data.items():  # path and the dictionary
-            for key, options in the_dict.items():  # each attribute
-                for value in options:  # each value
+        for url_path, dict_of_inputs in data.items():
+            for attr_name, list_of_options in dict_of_inputs.items():
+                for testee in list_of_options:
                     temp = {
-                        a: b[0] for a, b in the_dict.items()
+                        key: value[0] for key, value in dict_of_inputs.items()
                     }
-                    temp[key] = value
+                    temp[attr_name] = testee
+                    # display the testee ^ that blew up the test
                     output.append(temp)
-            yield output, path
+            yield output, url_path
             output = []
 
     # @unittest.skip('testing')
@@ -74,9 +79,9 @@ class EntryTester(LibraryClass):
             }
         }
 
-        for payload, path in self.flatten(data):
+        for payload, path, testee in self.flatten(data):
             # print(payload, '\n', path)
-            self.submitter(payload, 200, path)
+            self.submitter(payload, 200, path, testee)
 
     # def test_invalid_request(self):
     #     pass
