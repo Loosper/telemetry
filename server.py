@@ -31,24 +31,36 @@ def load_page():
     return app.send_static_file('telemetry.html')
 
 
-@app.route('/new/<thing>')
+@app.route('/new/<thing>', methods=['POST'])
 def enter(thing):
-    schema = schemas.enter_schema
+    mapping = {
+        'sim': schemas.enter_sim_schema,
+        'device': schemas.enter_device_schema
+    }
+    if thing not in mapping.keys():
+        abort(404)
+    data = load_json()
+
+    try:
+        mapping[thing](data)
+    except MultipleInvalid as e:
+        print(e.error_message)
+        abort(400)
+
+    query = 'INSERT INTO %s ({}) VALUES ({})'
+
+    return 200
 
 
 @app.route('/transfer/', methods=['POST'])  # PUT or POST
 def transfer():
     """Takes a JSON object containing the couple ID and the company name"""
     data = load_json()
-
     return_message = 'Success'
 
-    schema = schemas.transfer_schema
-
     try:
-        schema(data)
+        schemas.transfer_schema(data)
     except MultipleInvalid:
-        # print(exc.msg)
         abort(400)
 
     query = 'UPDATE couple SET assigned_to = %s WHERE id = %s'
