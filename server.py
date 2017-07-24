@@ -43,14 +43,21 @@ def load_page():
 
 # TODO: transferring
 # NOTE: LAN access is assumed and no data validation is provided
+# the couple table has relationships. Will it work as it does now or does it
+# require sprecial attention?
 class CrudHandler(MethodView):
-    def get(self, item):
+    def get(self, item, id):
         session = db.Session()
-        limit = int(request.args.get('_perPage'))
-        page = int(request.args.get('_page'))
-        items = session.query(self.resolve_table(item)).limit(limit).\
-            offset(limit * (page - 1)).all()
-        return json.dumps([item.serialise() for item in items])
+        if id is None:
+            limit = int(request.args.get('_perPage'))
+            page = int(request.args.get('_page'))
+            items = session.query(self.resolve_table(item)).limit(limit).\
+                offset(limit * (page - 1)).all()
+            return json.dumps([item.serialise() for item in items])
+        else:
+            return json.dumps(session.query(
+                self.resolve_table(item)
+            ).filter_by(id=id).first().serialise())
 
     def post(self, item):
         session = db.Session()
@@ -66,8 +73,12 @@ class CrudHandler(MethodView):
         session.commit()
         return ''
 
-    def update(self, item, id):
-        pass
+    def put(self, item, id):
+        session = db.Session()
+        session.query(self.resolve_table(item)).\
+            filter_by(id=id).update(load_json())
+        session.commit()
+        return ''
 
     def resolve_table(self, item):
         if item == 'devices':
@@ -80,17 +91,24 @@ class CrudHandler(MethodView):
 
 view = CrudHandler.as_view('devices')
 app.add_url_rule(
-    '/<item>/',
+    '/<item>/<id>',
     view_func=view,
-    methods=['GET', 'POST'],
+    methods=['GET', 'POST', 'DELETE', 'PUT'],
     strict_slashes=False
 )
 app.add_url_rule(
-    '/<item>/<id>',
+    '/<item>',
     view_func=view,
-    methods=['DELETE', 'UPDATE'],
-    strict_slashes=False
+    methods=['GET', 'POST'],
+    strict_slashes=False,
+    defaults={'id': None}
 )
+# app.add_url_rule(
+#     '/<item>/<id>',
+#     view_func=view,
+#     methods=['DELETE', 'UPDATE'],
+#     strict_slashes=False
+# )
 
 
 # @app.route('/transfer/', methods=['POST'])  # PUT or POST

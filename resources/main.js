@@ -30,8 +30,10 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     couple.listView().fields([
         nga.field('id'),
         nga.field('couple_date'),
-        nga.field('device'),
-        nga.field('sim'),
+        nga.field('device_id', 'reference').
+            targetEntity(device).targetField(nga.field('id')),
+        nga.field('sim_id', 'reference').
+            targetEntity(sim).targetField(nga.field('id')),
         nga.field('assigned_to')
     ]);
 
