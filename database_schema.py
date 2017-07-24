@@ -52,7 +52,7 @@ class Sim(Base):
 # sim and device should be a reference to a row
 class Couple(Base):
     __tablename__ = 'couples'
-    # __table_args__ = (UniqueConstraint('device_id', 'sim_id', name='uniquifier'),)
+    __table_args__ = (UniqueConstraint('device_id', 'sim_id'),)
 
     # auto increment this
     id = Column(Integer, primary_key=True, unique=True)

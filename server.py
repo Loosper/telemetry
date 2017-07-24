@@ -11,13 +11,6 @@ from flask import Flask, request, abort
 from flask.views import MethodView
 from voluptuous import Schema, Required, MultipleInvalid, All, Any, Number, In
 
-# WORKING PLAN:
-# 1. get databse in order
-# 2. Make a post endpoint to input data.
-# 3. Make a get endpoint to retrieve data.
-# 4 UPDATE and DELETE.
-# 5. Repeat for every db table.
-# 6. Make ng-admin endpoint to test. - happens in prallel with every method
 
 logger = logging.getLogger('App_logger')
 app = Flask(
@@ -55,6 +48,8 @@ class CrudHandler(MethodView):
                 offset(limit * (page - 1)).all()
             return json.dumps([item.serialise() for item in items])
         else:
+            # NOTE: if this is a couple
+            # and somehow device/sim is not there this blows up
             return json.dumps(session.query(
                 self.resolve_table(item)
             ).filter_by(id=id).first().serialise())
@@ -103,12 +98,6 @@ app.add_url_rule(
     strict_slashes=False,
     defaults={'id': None}
 )
-# app.add_url_rule(
-#     '/<item>/<id>',
-#     view_func=view,
-#     methods=['DELETE', 'UPDATE'],
-#     strict_slashes=False
-# )
 
 
 # @app.route('/transfer/', methods=['POST'])  # PUT or POST

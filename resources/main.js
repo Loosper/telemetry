@@ -37,7 +37,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         nga.field('assigned_to')
     ]);
 
-    // this is up for debate: should listing show everything or only crucial info?
+    // REVIEW: which method should show what?
     device.editionView().fields(device.listView().fields());
     device.creationView().fields(device.listView().fields());
     device.deletionView().fields(device.listView().fields());
