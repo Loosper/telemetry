@@ -3,11 +3,21 @@
 import sys
 import json
 import logging
-import MySQLdb as mysqldb
-from flask import Flask, request, abort
-from voluptuous import Schema, Required, MultipleInvalid, All, Any, Number, In
-from _mysql_exceptions import OperationalError
 
+import database_schema as db
+
+from flask import Flask, request, abort
+from flask.views import MethodView
+from voluptuous import Schema, Required, MultipleInvalid, All, Any, Number, In
+
+
+# WORKING PLAN:
+# 1. get databse in order
+# 2. Make a post endpoint to input data.
+# 3. Make a get endpoint to retrieve data.
+# 4 UPDATE and DELETE.
+# 5. Repeat for every db table.
+# 6. Make ng-admin endpoint to test. - happens in prallel with every method
 
 logger = logging.getLogger('App_logger')
 app = Flask(
@@ -38,7 +48,76 @@ def enter(thing):
     })
 
 
-@app.route('/transfer/', methods=['POST'])  # PUT or POST
+# ng-admin sends this as a get
+# /tasks?_page=1&_perPage=30&_sortDir=DESC&_sortField=id
+# delete is sent via id
+# post is sent in the body
+class DeviceHandler(MethodView):
+    def get(self):
+        session = db.Session()
+        to_get = int(request.args.get('_page')) *\
+            int(request.args.get('_perPage'))
+        items = session.query(db.Device).limit(to_get).all()
+        # print(items)
+        return json.dumps([item.serialise() for item in items])
+
+    def post(self):
+        session = db.Session()
+        device = load_json()
+        session.add(db.Device(**device))
+        session.commit()
+        # print(device)
+        return ''
+
+    def delete(self, id):
+        session = db.Session()
+        device = session.query(db.Device).filter_by(id=id).delete()
+        session.commit()
+        return ''
+
+    def update(self, id):
+        pass
+
+
+device_view = DeviceHandler.as_view('devices')
+app.add_url_rule(
+    '/devices/',
+    view_func=device_view,
+    methods=['GET', 'POST'],
+    strict_slashes=False
+)
+app.add_url_rule(
+    '/devices/<id>',
+    view_func=device_view,
+    methods=['DELETE', 'UPDATE'],
+    strict_slashes=False
+)
+
+
+class SimHandler(MethodView):
+    def get(self):
+        pass
+
+    def post(self):
+        pass
+
+    def delete(self, id):
+        pass
+
+    def update(self, id):
+        pass
+
+
+sim_view = SimHandler.as_view('sims')
+app.add_url_rule('/sims/', view_func=sim_view, methods=['GET'])
+app.add_url_rule(
+    '/sims/<id>',
+    view_func=sim_view,
+    methods=['DELETE', 'UPDATE']
+)
+
+
+# @app.route('/transfer/', methods=['POST'])  # PUT or POST
 def transfer():
     """Takes a JSON object containing the couple ID and the company name"""
     data = load_json()
@@ -78,22 +157,10 @@ def transfer():
 
 
 if __name__ == '__main__':
-    try:
-        database = mysqldb.connect(
-            user='user',
-            passwd='user',
-            db='telemetry'
-        )
-    except OperationalError:
-        print("Database not found!")
-        sys.exit()
-
     app.config.update(
         DEBUG=True,
         TESTING=True
         # DATABASE=database
     )
-    # app.config['DATABASE'] = database
 
     app.run(host='127.0.0.1')
-    database.close()

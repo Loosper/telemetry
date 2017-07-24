@@ -11,19 +11,29 @@ Base = declarative_base()
 class Device(Base):
     __tablename__ = 'devices'
 
-    id = Column(Integer(10), primary_key=True, unique=True)
+    id = Column(Integer, primary_key=True, unique=True)
     # date type if db supports it
     delivery_date = Column(String(25), nullable=False)
     provider = Column(String(50), nullable=False)
     type = Column(String(20), nullable=False)
     model = Column(String(20), nullable=False)
-    serial = Column(Integer(14), nullable=False)
+    serial = Column(Integer, nullable=False)
+
+    def serialise(self):
+        return {
+            'id': self.id,
+            'delivery_date': self.delivery_date,
+            'provider': self.provider,
+            'type': self.type,
+            'model': self.model,
+            'serial': self.serial
+        }
 
 
 class Sim(Base):
     __tablename__ = 'sims'
 
-    id = Column(Integer(10), primary_key=True, unique=True)
+    id = Column(Integer, primary_key=True, unique=True)
     # date type if db supports it
     delivery_date = Column(String(25), nullable=False)
     carrier = Column(String(20), nullable=False)
@@ -35,16 +45,17 @@ class Couple(Base):
     __table_args__ = (UniqueConstraint('device', 'sim'),)
 
     # auto increment this
-    id = Column(Integer(10), primary_key=True, unique=True)
-    device = Column(Integer(10), ForeignKey('devices.id'), nullable=False)
-    sim = Column(Integer(10), ForeignKey('sims.id'), nullable=False)
+    id = Column(Integer, primary_key=True, unique=True)
+    device = Column(Integer, ForeignKey('devices.id'), nullable=False)
+    sim = Column(Integer, ForeignKey('sims.id'), nullable=False)
     # date type if db supports it
     couple_date = Column(String(25), nullable=False)
     assigned_to = Column(String(25), nullable=False)
     # add relationships
 
 
-Session = sessionmaker(engine=create_engine(path, echo=False))
+engine = create_engine('sqlite:///database.sql', echo=False)
+Session = sessionmaker(bind=engine)
 
 # launching this by itself probably means to remake the database
 if __name__ == '__main__':
