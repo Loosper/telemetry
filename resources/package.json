@@ -1,0 +1,12 @@
+{
+    "name": "Telemetry",
+    "description": "Telemetry fornt-end",
+    "license": "NLPL",
+    "dependencies": {
+        "ng-admin": "1.0.6"
+    },
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/Loosper/telemetry"
+    }
+}
