@@ -4,12 +4,12 @@ import sys
 import json
 import logging
 
+
 import database_schema as db
 
 from flask import Flask, request, abort
 from flask.views import MethodView
 from voluptuous import Schema, Required, MultipleInvalid, All, Any, Number, In
-
 
 # WORKING PLAN:
 # 1. get databse in order
@@ -97,32 +97,19 @@ app.add_url_rule(
 def transfer():
     """Takes a JSON object containing the couple ID and the company name"""
     data = load_json()
-
-    company_mapping = {
-        -1: None,
-        0: 'Maverick Cardio-Telemetry',
-        1: 'Maverick Water-Telemetry'
-    }
     return_message = 'Success'
 
-    schema = Schema({
-        'couple': All(int, Number(precision=10)),
-        'company': All(int, In(company_mapping.keys()))
-        }, required=True)
-
     try:
-        schema(data)
+        schemas.transfer_schema(data)
     except MultipleInvalid:
-        # print(exc.msg)
         abort(400)
 
-    # literal strings on 3.6
     query = 'UPDATE couple SET assigned_to = %s WHERE id = %s'
     # print(query)
 
     cursor = database.cursor()
     cursor.execute(query, (
-        company_mapping[data['company']], data['couple']
+        schemas.company_mapping[data['company']], data['couple']
     ))
 
     if not cursor.fetchall():
