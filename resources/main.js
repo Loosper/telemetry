@@ -6,7 +6,11 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     var admin = nga.application('Telemetry administration page');
         // .baseApiUrl('http://localhost:5000/');
 
+    // TODO: input validation
     var device = nga.entity('devices');
+    var sim = nga.entity('sims');
+    var couple = nga.entity('couples');
+
     device.listView().fields([
         nga.field('id'),
         nga.field('delivery_date'),
@@ -16,12 +20,37 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         nga.field('serial')
     ]);
 
+    sim.listView().fields([
+        nga.field('id'),
+        nga.field('delivery_date'),
+        nga.field('carrier'),
+        nga.field('number')
+    ]);
+
+    couple.listView().fields([
+        nga.field('id'),
+        nga.field('couple_date'),
+        nga.field('device'),
+        nga.field('sim'),
+        nga.field('assigned_to')
+    ]);
+
     // this is up for debate: should listing show everything or only crucial info?
     device.editionView().fields(device.listView().fields());
     device.creationView().fields(device.listView().fields());
     device.deletionView().fields(device.listView().fields());
 
+    sim.editionView().fields(sim.listView().fields());
+    sim.creationView().fields(sim.listView().fields());
+    sim.deletionView().fields(sim.listView().fields());
+
+    couple.editionView().fields(couple.listView().fields());
+    couple.creationView().fields(couple.listView().fields());
+    couple.deletionView().fields(couple.listView().fields());
+
     admin.addEntity(device);
+    admin.addEntity(sim);
+    admin.addEntity(couple);
 
     // attach the admin application to the DOM and execute it
     nga.configure(admin);

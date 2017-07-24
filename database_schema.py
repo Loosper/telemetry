@@ -8,6 +8,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint,\
 Base = declarative_base()
 
 
+# TODO: relationships
 class Device(Base):
     __tablename__ = 'devices'
 
@@ -39,6 +40,14 @@ class Sim(Base):
     carrier = Column(String(20), nullable=False)
     number = Column(String(15), nullable=False)
 
+    def serialise(self):
+        return {
+            'id': self.id,
+            'delivery_date': self.delivery_date,
+            'carrier': self.carrier,
+            'number': self.number
+        }
+
 
 class Couple(Base):
     __tablename__ = 'couples'
@@ -52,6 +61,15 @@ class Couple(Base):
     couple_date = Column(String(25), nullable=False)
     assigned_to = Column(String(25), nullable=False)
     # add relationships
+
+    def serialise(self):
+        return {
+            'id': self.id,
+            'couple_date': self.couple_date,
+            'assigned_to': self.assigned_to,
+            'device': self.device,
+            'sim': self.sim
+        }
 
 
 engine = create_engine('sqlite:///database.sql', echo=False)

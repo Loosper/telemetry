@@ -41,79 +41,55 @@ def load_page():
     return app.send_static_file('telemetry.html')
 
 
-@app.route('/new/<thing>')
-def enter(thing):
-    voluptuous.Schema({
-
-    })
-
-
-# ng-admin sends this as a get
-# /tasks?_page=1&_perPage=30&_sortDir=DESC&_sortField=id
-# delete is sent via id
-# post is sent in the body
-class DeviceHandler(MethodView):
-    def get(self):
+# TODO: transferring
+# NOTE: LAN access is assumed and no data validation is provided
+class CrudHandler(MethodView):
+    def get(self, item):
         session = db.Session()
-        to_get = int(request.args.get('_page')) *\
-            int(request.args.get('_perPage'))
-        items = session.query(db.Device).limit(to_get).all()
-        # print(items)
+        limit = int(request.args.get('_perPage'))
+        page = int(request.args.get('_page'))
+        items = session.query(self.resolve_table(item)).limit(limit).\
+            offset(limit * (page - 1)).all()
         return json.dumps([item.serialise() for item in items])
 
-    def post(self):
+    def post(self, item):
         session = db.Session()
-        device = load_json()
-        session.add(db.Device(**device))
-        session.commit()
-        # print(device)
-        return ''
-
-    def delete(self, id):
-        session = db.Session()
-        device = session.query(db.Device).filter_by(id=id).delete()
+        db_item = load_json()
+        session.add(self.resolve_table(item)(**db_item))
         session.commit()
         return ''
 
-    def update(self, id):
+    def delete(self, item, id):
+        session = db.Session()
+        db_item = session.query(self.resolve_table(item)).\
+            filter_by(id=id).delete()
+        session.commit()
+        return ''
+
+    def update(self, item, id):
         pass
 
+    def resolve_table(self, item):
+        if item == 'devices':
+            return db.Device
+        elif item == 'sims':
+            return db.Sim
+        elif item == 'couples':
+            return db.Couple
 
-device_view = DeviceHandler.as_view('devices')
+
+view = CrudHandler.as_view('devices')
 app.add_url_rule(
-    '/devices/',
-    view_func=device_view,
+    '/<item>/',
+    view_func=view,
     methods=['GET', 'POST'],
     strict_slashes=False
 )
 app.add_url_rule(
-    '/devices/<id>',
-    view_func=device_view,
+    '/<item>/<id>',
+    view_func=view,
     methods=['DELETE', 'UPDATE'],
     strict_slashes=False
-)
-
-
-class SimHandler(MethodView):
-    def get(self):
-        pass
-
-    def post(self):
-        pass
-
-    def delete(self, id):
-        pass
-
-    def update(self, id):
-        pass
-
-
-sim_view = SimHandler.as_view('sims')
-app.add_url_rule('/sims/', view_func=sim_view, methods=['GET'])
-app.add_url_rule(
-    '/sims/<id>',
-    view_func=sim_view,
-    methods=['DELETE', 'UPDATE']
 )
 
 
